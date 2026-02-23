@@ -83,7 +83,7 @@
         </visual>
     </link>
     
-    <joint name="front_left_wheel_joint" type="fixed"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
+    <joint name="front_left_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
         <parent link="front_axis"/>
         <child link="front_left_wheel"/>
         <origin xyz="0 0 0.175" rpy="0 0 0"/>
@@ -96,7 +96,7 @@
             <material name="black"/>
         </visual>
     </link>
-    <joint name="front_right_wheel_joint" type="fixed"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
+    <joint name="front_right_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
         <parent link="front_axis"/>
         <child link="front_right_wheel"/>
         <origin xyz="0 0 -0.175" rpy="0 0 0"/>
@@ -110,7 +110,7 @@
         </visual>
     </link>
     
-    <joint name="rear_left_wheel_joint" type="fixed"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
+    <joint name="rear_left_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
         <parent link="rear_axis"/>
         <child link="rear_left_wheel"/>
         <origin xyz="0 0 0.175" rpy="0 0 0"/>
@@ -123,7 +123,7 @@
             <material name="black"/>
         </visual>
     </link>
-    <joint name="rear_right_wheel_joint" type="fixed"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
+    <joint name="rear_right_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
         <parent link="rear_axis"/>
         <child link="rear_right_wheel"/>
         <origin xyz="0 0 -0.175" rpy="0 0 0"/>
@@ -139,6 +139,6 @@
     <joint name="camera_joint" type="fixed">
         <parent link="robot_body"/>
         <child link="camera_link"/>
-        <origin xyz="0.15 0 0.1" rpy="0 0 0"/> <!-- XYZ to move RPY to rotate-->
+        <origin xyz="0.3 0 0.1" rpy="0 0 0"/> <!-- XYZ to move RPY to rotate-->
     </joint>
 </robot>
