@@ -55,6 +55,9 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_box>
     </link>
+    <gazebo reference="robot_body">
+        <material>Gazebo/Yellow</material>
+    </gazebo>
 
     <!-- Robot's front axis -->
     <link name="front_axis">
@@ -69,7 +72,10 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
-    
+    <gazebo reference="front_axis">
+         <material>Gazebo/Black</material>
+    </gazebo>
+
     <joint name="axis_joint_front" type="fixed">
         <parent link="robot_body"/>
         <child link="front_axis"/>
@@ -89,6 +95,9 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
+    <gazebo reference="rear_axis">
+         <material>Gazebo/Black</material>
+     </gazebo>
     
     <joint name="axis_joint_rear" type="fixed">
         <parent link="robot_body"/>
@@ -98,26 +107,6 @@
 
     <!-- Front axis wheels-->
     <!--wheel 1-->
-    <link name="front_left_wheel">
-        <visual>
-            <geometry><cylinder radius="0.05" length="0.02"/></geometry> <!-- wheel size-->
-            <material name="black"/>
-        </visual>
-        <collision>
-            <geometry><cylinder radius="0.05" length="0.02"/></geometry> <!-- wheel size-->
-        </collision>
-        <xacro:inertial_cylinder mass="0.03" length="0.2" radius="0.05"> <!--wheel inertia-->
-            <origin xyz="0 0 0" rpy="0 0 0"/>
-        </xacro:inertial_cylinder>
-    </link>
-    
-    <joint name="front_left_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
-        <parent link="front_axis"/>
-        <child link="front_left_wheel"/>
-        <origin xyz="0 0 0.175" rpy="0 0 0"/>
-    </joint>
-
-    <!--wheel 2-->
     <link name="front_right_wheel">
         <visual>
             <geometry><cylinder radius="0.05" length="0.02"/></geometry> <!-- wheel size-->
@@ -130,14 +119,19 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
+    <gazebo reference="front_right_wheel">
+        <material>Gazebo/Black</material>
+    </gazebo>
+    
     <joint name="front_right_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
         <parent link="front_axis"/>
         <child link="front_right_wheel"/>
-        <origin xyz="0 0 -0.175" rpy="0 0 0"/>
+        <origin xyz="0 0 0.175" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/> <!-- axis of rotation for the wheel -->
     </joint>
-<!-- rear axis wheels-->
-    <!--wheel 1-->
-    <link name="rear_left_wheel">
+
+    <!--wheel 2-->
+    <link name="front_left_wheel">
         <visual>
             <geometry><cylinder radius="0.05" length="0.02"/></geometry> <!-- wheel size-->
             <material name="black"/>
@@ -149,14 +143,19 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
+    <gazebo reference="front_left_wheel">
+        <material>Gazebo/Black</material>
+    </gazebo>
     
-    <joint name="rear_left_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
-        <parent link="rear_axis"/>
-        <child link="rear_left_wheel"/>
-        <origin xyz="0 0 0.175" rpy="0 0 0"/>
+    <joint name="front_left_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
+        <parent link="front_axis"/>
+        <child link="front_left_wheel"/>
+        <origin xyz="0 0 -0.175" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/> <!-- axis of rotation for the wheel -->
     </joint>
 
-    <!--wheel 2-->
+<!-- rear axis wheels-->
+    <!--wheel 1-->
     <link name="rear_right_wheel">
         <visual>
             <geometry><cylinder radius="0.05" length="0.02"/></geometry> <!-- wheel size-->
@@ -169,10 +168,39 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
+    <gazebo reference="rear_right_wheel">
+         <material>Gazebo/Black</material>
+    </gazebo>
+    
     <joint name="rear_right_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
         <parent link="rear_axis"/>
         <child link="rear_right_wheel"/>
+        <origin xyz="0 0 0.175" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/> <!-- axis of rotation for the wheel -->
+    </joint>
+
+    <!--wheel 2-->
+    <link name="rear_left_wheel">
+        <visual>
+            <geometry><cylinder radius="0.05" length="0.02"/></geometry> <!-- wheel size-->
+            <material name="black"/>
+        </visual>
+        <collision>
+            <geometry><cylinder radius="0.05" length="0.02"/></geometry> <!-- wheel size-->
+        </collision>
+        <xacro:inertial_cylinder mass="0.03" length="0.2" radius="0.05"> <!--wheel inertia-->
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+    <gazebo reference="rear_left_wheel">
+        <material>Gazebo/Black</material>
+    </gazebo>
+    
+    <joint name="rear_left_wheel_joint" type="continuous"> <!--Needs to be continuous for movement  (fixed for RVIZ2 setup)-->
+        <parent link="rear_axis"/>
+        <child link="rear_left_wheel"/>
         <origin xyz="0 0 -0.175" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/> <!-- axis of rotation for the wheel -->
     </joint>
 
     <!-- Robot's depth camera -->
@@ -188,6 +216,10 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_box>
     </link>
+     <gazebo reference="camera_link">
+        <material>Gazebo/Black</material>
+    </gazebo>
+
     <joint name="camera_joint" type="fixed">
         <parent link="robot_body"/>
         <child link="camera_link"/>
