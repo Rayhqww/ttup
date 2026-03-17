@@ -28,6 +28,14 @@
     <xacro:property name="camera_size_y" value="${body_width * 0.5}" />  <!-- half main body width -->
     <xacro:property name="camera_size_z" value="0.1" />
     <xacro:property name="camera_mass" value="0.1" />
+    <xacro:property name="camera_pan_min" value="${-pi/2}" />   <!-- -90° -->
+    <xacro:property name="camera_pan_max" value="${pi/2}" />    <!-- +90° -->
+    
+    <!-- Ультразвуковой датчик (спереди) -->
+    <xacro:property name="us_length" value="0.04" />  <!-- depth (forward) -->
+    <xacro:property name="us_width" value="0.05" />   <!-- width -->
+    <xacro:property name="us_height" value="0.02" />  <!-- height -->
+    <xacro:property name="us_mass" value="0.05" />
     
     <!-- Distance from center  (wheel base / 2) -->
     <xacro:property name="wheel_base_half" value="${body_length * 0.35}" />  <!-- 35% from length -->
@@ -62,6 +70,36 @@ link name="base_link"/>
     <gazebo reference="robot_body">
         <material>Gazebo/Yellow</material>
     </gazebo>
+
+    <!-- ========================================= -->
+    <!-- Ultrasonic sensor (front) -->
+    <!-- ========================================= -->
+    
+    <link name="ultrasonic_sensor">
+        <visual>
+            <geometry>
+                <box size="${us_length} ${us_width} ${us_height}"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${us_length} ${us_width} ${us_height}"/>
+            </geometry>
+        </collision>
+        <xacro:inertial_box mass="${us_mass}" x="${us_length}" y="${us_width}" z="${us_height}">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box>
+    </link>
+    <gazebo reference="ultrasonic_sensor">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+
+    <joint name="ultrasonic_joint" type="fixed">
+        <parent link="robot_body"/>
+        <child link="ultrasonic_sensor"/>
+        <origin xyz="${body_length/2 + us_length/2} 0 0" rpy="0 0 0"/>
+    </joint>
 
     <!-- ========================================= -->
     <!-- Axes (front and rear) -->
@@ -139,10 +177,35 @@ link name="base_link"/>
     <xacro:wheel name="rear_right" parent="rear" side="1"/>
     <xacro:wheel name="rear_left" parent="rear" side="-1"/>
 
-    <!-- ========================================= -->
-    <!-- Camera -->
+  <!-- ========================================= -->
+    <!-- СЕРВО И КАМЕРА (вращение влево-вправо) -->
     <!-- ========================================= -->
     
+    <!-- Корпус сервомотора -->
+    <link name="camera_servo">
+        <visual>
+            <geometry><box size="${servo_size} ${servo_size} ${servo_size}"/></geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry><box size="${servo_size} ${servo_size} ${servo_size}"/></geometry>
+        </collision>
+        <xacro:inertial_box mass="0.05" x="${servo_size}" y="${servo_size}" z="${servo_size}">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box>
+    </link>
+    <gazebo reference="camera_servo">
+        <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <!-- servo -->
+    <joint name="servo_mount_joint" type="fixed">
+        <parent link="robot_body"/>
+        <child link="camera_servo"/>
+        <origin xyz="${body_length/2 - servo_size} 0 ${body_height/2 + servo_size/2}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- camera -->
     <link name="camera_link">
         <visual>
             <geometry><box size="${camera_size_x} ${camera_size_y} ${camera_size_z}"/></geometry>
@@ -159,10 +222,15 @@ link name="base_link"/>
         <material>Gazebo/Black</material>
     </gazebo>
 
-    <joint name="camera_joint" type="fixed">
-        <parent link="robot_body"/>
+    <!-- camera joint: turns left-right (around Z axis) -->
+    <!-- 0° = forward, -90° = left, +90° = right -->
+    <joint name="camera_pan_joint" type="revolute">
+        <parent link="camera_servo"/>
         <child link="camera_link"/>
-        <origin xyz="${body_length/2} 0 ${body_height/2 + camera_size_z/2}" rpy="0 0 0"/>
+        <origin xyz="0 0 ${servo_size/2}" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>  <!-- Turn around Z axis (left-right) -->
+        <limit lower="${camera_pan_min}" upper="${camera_pan_max}" effort="2.0" velocity="5.0"/>
+        <dynamics damping="0.5" friction="0.1"/>
     </joint>
 
 </robot>
