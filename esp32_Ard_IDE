@@ -1,0 +1,117 @@
+// Motor connections (controll physically)
+#define ML1 25  // left front +
+#define ML2 26  // left front -
+#define MR1 27  // right front +
+#define MR2 14  // right front -
+#define ML3 12  // left rear (for 4WD robot)
+#define ML4 13  // left rear
+#define MR3 32  // right rear
+#define MR4 33  // right rear
+
+#define SERVO_PIN 15  // Camera servo
+#define TRIG_PIN 5    // Ultrasonic Trig
+#define ECHO_PIN 18   // Ultrasonic Echo
+
+#include <Servo.h>
+Servo cameraServo;
+
+String command = "";
+int currentAngle = 90;
+
+void setup() {
+  Serial.begin(115200);  // Connection with Raspberry Pi 5
+  
+  // Motor setup
+  pinMode(ML1, OUTPUT); pinMode(ML2, OUTPUT);
+  pinMode(MR1, OUTPUT); pinMode(MR2, OUTPUT);
+  pinMode(ML3, OUTPUT); pinMode(ML4, OUTPUT);
+  pinMode(MR3, OUTPUT); pinMode(MR4, OUTPUT);
+  
+  // Ultrasonic (used only front sensor)
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  
+  // Camera servo 
+  cameraServo.attach(SERVO_PIN);
+  cameraServo.write(90);  // Middle
+  
+  stopMotors();
+  Serial.println("ESP32 defined");
+}
+
+void loop() {
+  // Read Raspberry Pi commands
+  if (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n') {
+      executeCommand(command);
+      command = "";
+    } else {
+      command += c;
+    }
+  }
+  
+  // Send distance every 100ms (can be adjusted)
+  static unsigned long lastSend = 0;
+  if (millis() - lastSend > 100) {
+    int dist = getDistance();
+    Serial.println("D:" + String(dist));  // D:45 (cm)
+    lastSend = millis();
+  }
+}
+
+void executeCommand(String cmd) {
+  // Commands: "F" (forward), "L" (left), "R" (right), "S" (stop), "A:90" (camera angle, servo)
+  
+  if (cmd == "F") {
+    digitalWrite(ML1, HIGH); digitalWrite(ML2, LOW);
+    digitalWrite(MR1, HIGH); digitalWrite(MR2, LOW);
+    digitalWrite(ML3, HIGH); digitalWrite(ML4, LOW);
+    digitalWrite(MR3, HIGH); digitalWrite(MR4, LOW);
+  }
+  else if (cmd == "B") {
+    digitalWrite(ML1, LOW); digitalWrite(ML2, HIGH);
+    digitalWrite(MR1, LOW); digitalWrite(MR2, HIGH);
+    digitalWrite(ML3, LOW); digitalWrite(ML4, HIGH);
+    digitalWrite(MR3, LOW); digitalWrite(MR4, HIGH);
+  }
+  else if (cmd == "L") {  // standing turn left
+    digitalWrite(ML1, LOW); digitalWrite(ML2, HIGH);
+    digitalWrite(MR1, HIGH); digitalWrite(MR2, LOW);
+    digitalWrite(ML3, LOW); digitalWrite(ML4, HIGH);
+    digitalWrite(MR3, HIGH); digitalWrite(MR4, LOW);
+  }
+  else if (cmd == "R") {  // standing turn right
+    digitalWrite(ML1, HIGH); digitalWrite(ML2, LOW);
+    digitalWrite(MR1, LOW); digitalWrite(MR2, HIGH);
+    digitalWrite(ML3, HIGH); digitalWrite(ML4, LOW);
+    digitalWrite(MR3, LOW); digitalWrite(MR4, HIGH);
+  }
+  else if (cmd == "S") {
+    stopMotors();
+  }
+  else if (cmd.startsWith("A:")) {  // servo angle
+    int angle = cmd.substring(2).toInt();
+    angle = constrain(angle, 45, 135);  // angle limits (servo has 180deg)
+    cameraServo.write(angle);
+  }
+}
+
+void stopMotors() {
+  digitalWrite(ML1, LOW); digitalWrite(ML2, LOW);
+  digitalWrite(MR1, LOW); digitalWrite(MR2, LOW);
+  digitalWrite(ML3, LOW); digitalWrite(ML4, LOW);
+  digitalWrite(MR3, LOW); digitalWrite(MR4, LOW);
+}
+
+int getDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000);  // timeout 30ms
+  if (duration == 0) return 999;  // No echo
+  return duration * 0.034 / 2;    // to centimeters
+}
