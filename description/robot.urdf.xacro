@@ -3,5 +3,5 @@
 
     <xacro:include filename="robot_st.xacro" />
     <xacro:include filename="gazebo_control.xacro" />
-
+    <xacro:include filename="robot_rviz_colors" />
 </robot>
