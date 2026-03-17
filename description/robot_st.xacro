@@ -36,6 +36,7 @@
     <xacro:property name="us_width" value="0.05" />   <!-- width -->
     <xacro:property name="us_height" value="0.02" />  <!-- height -->
     <xacro:property name="us_mass" value="0.05" />
+    <xacro:property name="servo_size" value="0.03" />
     
     <!-- Distance from center  (wheel base / 2) -->
     <xacro:property name="wheel_base_half" value="${body_length * 0.35}" />  <!-- 35% from length -->
@@ -43,7 +44,7 @@
 
     <!-- Base link, needed due to some limitations in rviz2 -->
 
-link name="base_link"/>
+    <link name="base_link"/>
 
     <joint name="base_to_body" type="fixed">
         <parent link="base_link"/>
