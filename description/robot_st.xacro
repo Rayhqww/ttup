@@ -7,40 +7,40 @@
     <!-- ========================================= -->
     <!-- Robot parameters - change here -->
     <!-- ========================================= -->
-    
+    <!-- full robot mass approx 750g -->
     <!-- Main body -->
-    <xacro:property name="body_length" value="0.7" />    <!-- (X) -->
-    <xacro:property name="body_width" value="0.35" />  <!-- (Y) -->
-    <xacro:property name="body_height" value="0.1" />    <!-- (Z) -->
-    <xacro:property name="body_mass" value="1.0" />
+    <xacro:property name="body_length" value="0.23" />    <!-- (X) -->
+    <xacro:property name="body_width" value="0.13" />  <!-- (Y) -->
+    <xacro:property name="body_height" value="0.12" />    <!-- (Z) -->
+    <xacro:property name="body_mass" value="0.65" />
     
     <!-- Axes -->
     <xacro:property name="axis_radius" value="0.005" />
-    <xacro:property name="axis_mass" value="0.01" />
+    <xacro:property name="axis_mass" value="0.02" />
     
     <!-- Wheels -->
-    <xacro:property name="wheel_radius" value="0.05" />
-    <xacro:property name="wheel_width" value="0.02" />
+    <xacro:property name="wheel_radius" value="0.03" />
+    <xacro:property name="wheel_width" value="0.03" />
     <xacro:property name="wheel_mass" value="0.03" />
     
     <!-- camera (relative to other dimensions) -->
-    <xacro:property name="camera_size_x" value="0.05" />
-    <xacro:property name="camera_size_y" value="${body_width * 0.5}" />  <!-- half main body width -->
-    <xacro:property name="camera_size_z" value="0.1" />
-    <xacro:property name="camera_mass" value="0.1" />
+    <xacro:property name="camera_size_x" value="0.04" />
+    <xacro:property name="camera_size_y" value="0.03" />  <!-- half main body width -->
+    <xacro:property name="camera_size_z" value="0.04" />
+    <xacro:property name="camera_mass" value="0.01" />
     <xacro:property name="camera_pan_min" value="${-pi/2}" />   <!-- -90° -->
     <xacro:property name="camera_pan_max" value="${pi/2}" />    <!-- +90° -->
     
     <!-- Ультразвуковой датчик (спереди) -->
-    <xacro:property name="us_length" value="0.04" />  <!-- depth (forward) -->
-    <xacro:property name="us_width" value="0.05" />   <!-- width -->
-    <xacro:property name="us_height" value="0.02" />  <!-- height -->
-    <xacro:property name="us_mass" value="0.05" />
+    <xacro:property name="us_length" value="0.015" />  <!-- depth (forward) -->
+    <xacro:property name="us_width" value="0.045" />   <!-- width -->
+    <xacro:property name="us_height" value="0.02" />  <!-- height --> 
+    <xacro:property name="us_mass" value="0.005" />
     <xacro:property name="servo_size" value="0.03" />
     
     <!-- Distance from center  (wheel base / 2) -->
     <xacro:property name="wheel_base_half" value="${body_length * 0.35}" />  <!-- 35% from length -->
-    <xacro:property name="axis_height" value="${body_height * 0.5 + wheel_radius}" />
+    <xacro:property name="axis_height" value="${wheel_radius + 0.03}" />
 
     <!-- Base link, needed due to some limitations in rviz2 -->
 
@@ -49,6 +49,7 @@
     <joint name="base_to_body" type="fixed">
         <parent link="base_link"/>
         <child link="robot_body"/>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
     </joint>
 
     <!-- robot's body -->
@@ -92,9 +93,7 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_box>
     </link>
-    <gazebo reference="ultrasonic_sensor">
-        <material>Gazebo/Blue</material>
-    </gazebo>
+    
 
     <joint name="ultrasonic_joint" type="fixed">
         <parent link="robot_body"/>
@@ -110,13 +109,13 @@
     <xacro:macro name="wheel_axis" params="name">
         <link name="${name}_axis">
             <visual>
-                <geometry><cylinder radius="${axis_radius}" length="${body_width}"/></geometry>
+                <geometry><cylinder radius="${axis_radius}" length="${body_width + wheel_width}"/></geometry>
                 <material name="black"/>
             </visual>
             <collision>
-                <geometry><cylinder radius="${axis_radius}" length="${body_width}"/></geometry>
+                <geometry><cylinder radius="${axis_radius}" length="${body_width + wheel_width}"/></geometry>
             </collision>
-            <xacro:inertial_cylinder mass="${axis_mass}" length="${body_width}" radius="${axis_radius}">
+            <xacro:inertial_cylinder mass="${axis_mass}" length="${body_width + wheel_width}" radius="${axis_radius}">
                 <origin xyz="0 0 0" rpy="0 0 0"/>
             </xacro:inertial_cylinder>
         </link>
@@ -167,7 +166,7 @@
         <joint name="${name}_wheel_joint" type="continuous">
             <parent link="${parent}_axis"/>
             <child link="${name}_wheel"/>
-            <origin xyz="0 0 ${side * (body_width/2)}" rpy="0 0 0"/>
+            <origin xyz="0 0 ${side * (body_width/2 + wheel_width/2 + 0.005)}" rpy="0 0 0"/>
             <axis xyz="0 0 1"/>
         </joint>
     </xacro:macro>
@@ -179,10 +178,10 @@
     <xacro:wheel name="rear_left" parent="rear" side="-1"/>
 
   <!-- ========================================= -->
-    <!-- СЕРВО И КАМЕРА (вращение влево-вправо) -->
+    <!-- servo and camera (rotates) -->
     <!-- ========================================= -->
     
-    <!-- Корпус сервомотора -->
+    <!-- servo lin -->
     <link name="camera_servo">
         <visual>
             <geometry><box size="${servo_size} ${servo_size} ${servo_size}"/></geometry>
@@ -199,7 +198,7 @@
         <material>Gazebo/Grey</material>
     </gazebo>
 
-    <!-- servo -->
+    <!-- servo joint -->
     <joint name="servo_mount_joint" type="fixed">
         <parent link="robot_body"/>
         <child link="camera_servo"/>
@@ -233,5 +232,86 @@
         <limit lower="${camera_pan_min}" upper="${camera_pan_max}" effort="2.0" velocity="5.0"/>
         <dynamics damping="0.5" friction="0.1"/>
     </joint>
+
+    <!-- Gazebo Camera Plugin -->
+    <gazebo reference="camera_link">
+    <sensor type="camera" name="camera_sensor">
+        <update_rate>30.0</update_rate>
+        <camera name="camera">
+        <visualize>true</visualize>
+            <horizontal_fov>1.047</horizontal_fov>  <!-- 60 degrees -->
+            <image>
+                <width>640</width>
+                <height>480</height>
+                <format>R8G8B8</format>
+            </image>
+            <clip>
+                <near>0.05</near>
+                <far>100</far>
+            </clip>
+        </camera>
+       <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <ros>
+                <remapping>~/image:=/camera/image_raw</remapping>
+            </ros>
+            <frame_name>camera_link</frame_name>
+    </plugin>   
+    </sensor>
+</gazebo>
+<gazebo reference="front_left_wheel">
+    <mu1>0.3</mu1>
+    <mu2>0.3</mu2>
+    <fdir1>1 0 0</fdir1>
+</gazebo>
+
+<gazebo reference="front_right_wheel">
+    <mu1>0.3</mu1>
+    <mu2>0.3</mu2>
+    <fdir1>1 0 0</fdir1>
+</gazebo>
+
+<gazebo reference="rear_left_wheel">
+    <mu1>0.3</mu1>
+    <mu2>0.3</mu2>
+    <fdir1>1 0 0</fdir1>
+</gazebo>
+
+<gazebo reference="rear_right_wheel">
+    <mu1>0.3</mu1>
+    <mu2>0.3</mu2>
+    <fdir1>1 0 0</fdir1>
+</gazebo>
+<!-- ultrasonic (functional) -->
+<gazebo reference="ultrasonic_sensor">
+    <material>Gazebo/Blue</material>
+    <sensor type="ray" name="ultrasonic">
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+        <update_rate>10</update_rate>
+        <ray>
+            <scan>
+                <horizontal>
+                    <samples>1</samples>
+                    <resolution>1</resolution>
+                    <min_angle>0</min_angle>
+                    <max_angle>0</max_angle>
+                </horizontal>
+            </scan>
+            <range>
+                <min>0.02</min>
+                <max>4.0</max>
+                <resolution>0.01</resolution>
+            </range>
+        </ray>
+        <plugin name="ultrasonic_controller" filename="libgazebo_ros_ray_sensor.so">
+            <ros>
+                <namespace>/</namespace>
+                <remapping>~/out:=/ultrasonic</remapping>
+            </ros>
+            <output_type>sensor_msgs/Range</output_type>
+            <frame_name>ultrasonic_sensor</frame_name>
+        </plugin>
+    </sensor>
+</gazebo>
 
 </robot>
