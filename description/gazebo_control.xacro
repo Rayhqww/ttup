@@ -1,8 +1,20 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <gazebo>
-    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-      <parameters>$(find ttup)/config/ros2_controllers.yaml</parameters>
-    </plugin>
-  </gazebo>
+    <gazebo>
+        <plugin name="diff_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <update_rate>50</update_rate>
+            <left_joint>rear_left_wheel_joint</left_joint>
+            <right_joint>rear_right_wheel_joint</right_joint>
+            <wheel_separation>0.17</wheel_separation>
+            <wheel_diameter>0.06</wheel_diameter>
+            <max_wheel_torque>20</max_wheel_torque>
+            <max_wheel_acceleration>10</max_wheel_acceleration>
+            <command_topic>/cmd_vel</command_topic>
+            <odometry_topic>/odom</odometry_topic>
+            <odometry_frame>odom</odometry_frame>
+            <robot_base_frame>base_link</robot_base_frame>
+            <publish_odom>true</publish_odom>
+            <publish_odom_tf>true</publish_odom_tf>
+        </plugin>
+    </gazebo>
 </robot>
